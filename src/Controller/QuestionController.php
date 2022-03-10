@@ -1,8 +1,11 @@
 <?php
 namespace App\Controller;
 
+use Sentry\State\HubInterface;
 use Psr\Log\LoggerInterface;
 use App\Service\MarkdownHelper;
+// use Symfony\Contracts\Cache\CacheInterface;
+// use Knp\Bundle\MarkdownBundle\MarkdownParserInterface;
 use Twig\Environment;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -10,18 +13,20 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class QuestionController extends AbstractController
 {
+
     private $logger;
     private $isDebug;
 
-    /**
-     * @Route("/",name="app_homepage")
-     */
-    public function __construct(LoggerInterface $logger, bool $isDebug){
+
+    public function __construct(LoggerInterface $logger, bool $isDebug)
+    {
         $this->logger = $logger;
         $this->isDebug = $isDebug;
     }
 
-
+    /**
+     * @Route("/",name="app_homepage")
+     */
     public function homepage(Environment $twigEnvironment)
     {
         // $html = $twigEnvironment->render('question/homepage.html.twig');
@@ -33,10 +38,17 @@ class QuestionController extends AbstractController
      */
     public function show($slug,MarkdownHelper $markdownHelper)
     {
+       
         if ($this->isDebug) {
+
             $this->logger->info('We are in Debug Mode!');
-        }
-        // dump($this->getParameter('cache_adapter'));
+            
+            }
+            
+        
+            // throw new \Exception('Bad stuff happened!');
+        //dump($isDebug);
+       // dump($this->getParameter('cache_adapter'));
         $answers=['make sure your cat is sitting `perfectly`',
                 'furry shoes better than cat',
                 'try it backwards'    
