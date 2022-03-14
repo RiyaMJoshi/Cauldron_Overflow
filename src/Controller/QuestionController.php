@@ -11,6 +11,7 @@ use App\Service\MarkdownHelper;
 // use Knp\Bundle\MarkdownBundle\MarkdownParserInterface;
 use Twig\Environment;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -33,14 +34,11 @@ class QuestionController extends AbstractController
     public function homepage(QuestionRepository $repository)
     {
         // $repository = $entityManager->getRepository(Question::class);
-        //$questions = $repository->findBy([], ['askedAt' => 'DESC']);
         $questions = $repository->findAllAskedOrderedByNewest();
 
-        // $html = $twigEnvironment->render('question/homepage.html.twig');
         return $this->render('question/homepage.html.twig', [
             'questions' => $questions,
         ]);
-        // return new Response($html);
     }
 
     /**
@@ -67,6 +65,7 @@ EOF
             $question->setAskedAt(new \DateTime(sprintf('-%d days', rand(1, 100))));
         }
 
+        $question->setVotes(rand(-20, 50));
         $entityManager->persist($question);
         $entityManager->flush();
 
@@ -81,25 +80,14 @@ EOF
      /**
      * @Route("/questions/{slug}",name="app_question_show")
      */
-    public function show($slug,MarkdownHelper $markdownHelper, EntityManagerInterface $entityManager)
-    {
-       
+    public function show(Question $question)
+    {       
         if ($this->isDebug) {
 
             $this->logger->info('We are in Debug Mode!');
             
         }
-            
-        $repository = $entityManager->getRepository(Question::class);
-        /** @var Question|null $question    */
-        $question = $repository->findOneBy(['slug' => $slug]);
-        if (!$question) {
-            throw $this->createNotFoundException(sprintf('No question found for slug %s', $slug));
-        }
-        
 
-         // throw new \Exception('Bad stuff happened!');
-        
         $answers=['make sure your cat is sitting `perfectly`',
                 'furry shoes better than cat',
                 'try it backwards'    
@@ -123,6 +111,25 @@ EOF
         
     }
 
+    /**
+     * @Route("/questions/{slug}/vote", name="app_question_vote", methods="POST")
+     */
+    public function questionVote(Question $question, Request $request, EntityManagerInterface $entityManager){
+        $direction = $request->request->get('direction');
+
+        if($direction === 'up'){
+            $question->upVote();
+        }
+        else if($direction === 'down'){
+            $question->downVote();
+        }
+        
+        $entityManager->flush();
+
+        return $this->redirectToRoute('app_question_show', [
+            'slug' => $question->getSlug(),
+        ]);
+    }
 }
 
 
