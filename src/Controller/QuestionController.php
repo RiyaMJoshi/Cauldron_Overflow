@@ -4,6 +4,7 @@ namespace App\Controller;
 use App\Repository\QuestionRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Question;
+use App\Repository\AnswerRepository;
 use Sentry\State\HubInterface;
 use Psr\Log\LoggerInterface;
 use App\Service\MarkdownHelper;
@@ -60,25 +61,11 @@ class QuestionController extends AbstractController
             
         }
 
-        $answers=['make sure your cat is sitting `perfectly`',
-                'furry shoes better than cat',
-                'try it backwards'    
-    ];
-
-    // $questionText="I\'ve been turned into a cat, any thoughts on how to turn back? While I\'m **adorable**, I don\'t really care for cat food.";
-    // $parsedQuestionText = $markdownHelper->parse($questionText);
-
-      
-        /* return $this->render('question/show.html.twig',[
-            'question'=> ucwords(str_replace('-', ' ', $slug)),
-            'questionText'=>$parsedQuestionText,
-            'answers'=>$answers,
-        ]);
-        */
-
+         $answers = $question->getAnswers();
+        
         return $this->render('question/show.html.twig',[
             'question'=> $question,
-            'answers'=>$answers,
+             'answers'=>$answers,
         ]);
         
     }
