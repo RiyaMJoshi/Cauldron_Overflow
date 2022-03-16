@@ -3,8 +3,10 @@
 namespace App\Controller;
 
 use App\Entity\Answer;
+use App\Repository\AnswerRepository;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
+use Http\Client\Common\Plugin\RetryPlugin;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -33,11 +35,17 @@ class AnswerController extends AbstractController
         $entityManager->flush();
         return $this->json(['votes' => $answer->getVotes()]);
     }
+    
     /**
-     * @Route("/test", methods="get", name="test")
+     * @Route("/answer/popular", name="app_popular_answers")
      */
-    public function test()
+    public function popularAnswers(AnswerRepository $answerRepository, Request $request)
     {
-        dd('test');
+        $answers = $answerRepository->findMostPopular(
+            $request->query->get('q')
+        );
+        return $this->render('answer/popularAnswers.html.twig', [
+            'answers' => $answers
+        ]);
     }
 }
