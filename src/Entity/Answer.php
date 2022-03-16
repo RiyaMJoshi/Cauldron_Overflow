@@ -3,14 +3,20 @@
 namespace App\Entity;
 
 use App\Repository\AnswerRepository;
+use Doctrine\Common\Cache\Psr6\InvalidArgument;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
+use InvalidArgumentException;
 
 /**
  * @ORM\Entity(repositoryClass=AnswerRepository::class)
  */
 class Answer
 {
+    public const STATUS_NEEDS_APPROVAL ="needs_approval";
+    public const STATUS_SPAM ="spam";
+    public const STATUS_APPROVED ="approved";
+
     use TimestampableEntity;
     /**
      * @ORM\Id
@@ -39,6 +45,11 @@ class Answer
      * @ORM\JoinColumn(nullable=false)
      */
     private $question;
+
+    /**
+     * @ORM\Column(type="string", length=15)
+     */
+    private $status = self::STATUS_NEEDS_APPROVAL;
 
     public function getId(): ?int
     {
@@ -97,5 +108,25 @@ class Answer
         $this->question = $question;
 
         return $this;
+    }
+
+    public function getStatus(): ?string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(string $status): self
+    {
+        if (!in_array($status, [self::STATUS_NEEDS_APPROVAL, self::STATUS_SPAM, self::STATUS_APPROVED])) {
+            throw new \InvalidArgumentException(sprintf('Invalid status %s', $status));
+        }
+        $this->status = $status;
+
+        return $this;
+    }
+
+    public function isApproved(): bool 
+    {
+        return $this->status === self::STATUS_APPROVED;
     }
 }
