@@ -2,10 +2,13 @@
 
 namespace App\DataFixtures;
 
+//use Zenstruck\Foundry\TProxiedObject;
+use App\Entity\Tag;
 use App\Entity\Answer;
 use App\Entity\Question;
 use App\Factory\AnswerFactory;
 use App\Factory\QuestionFactory;
+use App\Factory\TagFactory;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 
@@ -13,9 +16,13 @@ class AppFixtures extends Fixture
 {
     public function load(ObjectManager $manager): void
     {
-       $questions = QuestionFactory::new()->createMany(20);
+        TagFactory::createMany(100);
 
-       QuestionFactory::new()
+        $questions = QuestionFactory::new()->createMany(20, [
+            'tags' => TagFactory::randomRange(0, 5),
+        ]);
+
+        QuestionFactory::new()
             ->unpublished()
             ->createMany(5)
         ;
@@ -32,6 +39,22 @@ class AppFixtures extends Fixture
                 'question' => $questions[array_rand($questions)],
             ];
         })->needsApproval()->many(20)->create();
+
+        $question = QuestionFactory::createOne()->object();
+
+        $tag1 = new Tag();
+        $tag1->setName('dinosaurs');
+        $tag2 = new Tag();
+        $tag2->setName('monster trucks');
+
+        // $question->addTag($tag1);
+        // $question->addTag($tag2);
+
+        $tag1->addQuestion($question);
+        $tag2->addQuestion($question);
+        
+        $manager->persist($tag1);
+        $manager->persist($tag2);
 
         $manager->flush();
     }
