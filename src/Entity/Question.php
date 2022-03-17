@@ -2,7 +2,11 @@
 
 namespace App\Entity;
 
+use App\Repository\AnswerRepository;
 use App\Repository\QuestionRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
@@ -45,6 +49,23 @@ class Question
      * @ORM\Column(type="integer")
      */
     private $votes = 0;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Answer::class, mappedBy="question", fetch="EXTRA_LAZY")
+     * @ORM\OrderBy({"createdAt" = "DESC"})
+     */
+    private $answers;
+
+    /**
+     * @ORM\OneToMany(targetEntity=QuestionTag::class, mappedBy="question")
+     */
+    private $questionTags;
+
+    public function __construct()
+    {
+        $this->answers = new ArrayCollection();
+        $this->questionTags = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -128,4 +149,70 @@ class Question
         $this->votes--;
         return $this;
     }
+
+    /**
+     * @return Collection<int, Answer>
+     */
+    public function getAnswers(): Collection
+    {
+        return $this->answers;
+    }
+
+    public function getApprovedAnswers(): Collection
+    {
+        return $this->answers->matching(AnswerRepository::createApprovedCriteria());
+    }
+    
+    public function addAnswer(Answer $answer): self
+    {
+        if (!$this->answers->contains($answer)) {
+            $this->answers[] = $answer;
+            $answer->setQuestion($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAnswer(Answer $answer): self
+    {
+        if ($this->answers->removeElement($answer)) {
+            // set the owning side to null (unless already changed)
+            if ($answer->getQuestion() === $this) {
+                $answer->setQuestion(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, QuestionTag>
+     */
+    public function getQuestionTags(): Collection
+    {
+        return $this->questionTags;
+    }
+
+    public function addQuestionTag(QuestionTag $questionTag): self
+    {
+        if (!$this->questionTags->contains($questionTag)) {
+            $this->questionTags[] = $questionTag;
+            $questionTag->setQuestion($this);
+        }
+
+        return $this;
+    }
+
+    public function removeQuestionTag(QuestionTag $questionTag): self
+    {
+        if ($this->questionTags->removeElement($questionTag)) {
+            // set the owning side to null (unless already changed)
+            if ($questionTag->getQuestion() === $this) {
+                $questionTag->setQuestion(null);
+            }
+        }
+
+        return $this;
+    }
+
 }

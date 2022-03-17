@@ -4,11 +4,12 @@ namespace App\Controller;
 use App\Repository\QuestionRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Question;
+use App\Repository\AnswerRepository;
 use Sentry\State\HubInterface;
 use Psr\Log\LoggerInterface;
 use App\Service\MarkdownHelper;
-// use Symfony\Contracts\Cache\CacheInterface;
-// use Knp\Bundle\MarkdownBundle\MarkdownParserInterface;
+use Pagerfanta\Doctrine\ORM\QueryAdapter;
+use Pagerfanta\Pagerfanta;
 use Twig\Environment;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -29,15 +30,22 @@ class QuestionController extends AbstractController
     }
 
     /**
-     * @Route("/",name="app_homepage")
+     * @Route("/{page<\d+>}",name="app_homepage")
      */
-    public function homepage(QuestionRepository $repository)
+    public function homepage(QuestionRepository $repository, Request $request, int $page = 1)
     {
         // $repository = $entityManager->getRepository(Question::class);
-        $questions = $repository->findAllAskedOrderedByNewest();
+        $queryBuilder = $repository->createAskedOrderedByNewestQueryBuilder();
+
+        $pagerfanta = new Pagerfanta(
+            new QueryAdapter($queryBuilder)
+        );
+
+        $pagerfanta->setMaxPerPage(5);
+        $pagerfanta->setCurrentPage($page);
 
         return $this->render('question/homepage.html.twig', [
-            'questions' => $questions,
+            'pager' => $pagerfanta,
         ]);
     }
 
@@ -60,25 +68,11 @@ class QuestionController extends AbstractController
             
         }
 
-        $answers=['make sure your cat is sitting `perfectly`',
-                'furry shoes better than cat',
-                'try it backwards'    
-    ];
-
-    // $questionText="I\'ve been turned into a cat, any thoughts on how to turn back? While I\'m **adorable**, I don\'t really care for cat food.";
-    // $parsedQuestionText = $markdownHelper->parse($questionText);
-
-      
-        /* return $this->render('question/show.html.twig',[
-            'question'=> ucwords(str_replace('-', ' ', $slug)),
-            'questionText'=>$parsedQuestionText,
-            'answers'=>$answers,
-        ]);
-        */
-
+         $answers = $question->getAnswers();
+        
         return $this->render('question/show.html.twig',[
             'question'=> $question,
-            'answers'=>$answers,
+             'answers'=>$answers,
         ]);
         
     }
