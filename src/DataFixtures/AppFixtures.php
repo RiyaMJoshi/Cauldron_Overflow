@@ -2,7 +2,6 @@
 
 namespace App\DataFixtures;
 
-//use Zenstruck\Foundry\TProxiedObject;
 use App\Entity\Tag;
 use App\Entity\Answer;
 use App\Entity\Question;
@@ -18,13 +17,13 @@ class AppFixtures extends Fixture
     public function load(ObjectManager $manager): void
     {
         TagFactory::createMany(100);
+       
+        $questions = QuestionFactory::new()->createMany(20);
 
-        QuestionTagFactory::createMany(10);
-        return;
-
-        $questions = QuestionFactory::new()->createMany(20, function(){
+        QuestionTagFactory::createMany(100, function(){
             return [
-                'tags' => TagFactory::randomRange(0, 5),
+                'tag' => TagFactory::random(),
+                'question' => QuestionFactory::random(),
             ];
         });
 
