@@ -4,6 +4,9 @@ security:
     # Uncomment below line to Throw 'UserNotFoundExcepiton' instead of 'BadCredentialsException' if username is incorrect
     hide_user_not_found: false
 
+    role_hierarchy:
+        ROLE_ADMIN: [ROLE_COMMENT_ADMIN]
+
     # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
     password_hashers:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
