@@ -11,6 +11,7 @@ use App\Service\MarkdownHelper;
 use Pagerfanta\Doctrine\ORM\QueryAdapter;
 use Pagerfanta\Pagerfanta;
 use Twig\Environment;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -51,8 +52,17 @@ class QuestionController extends AbstractController
 
     /**
      * @Route("/questions/new")
+     * @IsGranted("ROLE_USER")
      */
-    public function new(EntityManagerInterface $entityManager){
+    public function new(){
+        // $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        // Above is same as below if condition
+        /*
+        if (!$this->isGranted('ROLE_ADMIN')) {
+            throw $this->createAccessDeniedException('No access for you!');
+            
+        } 
+        */
         return new Response('Sounds like a GREAT feature for V2!');
     }
 

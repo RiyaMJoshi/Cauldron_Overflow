@@ -4,23 +4,28 @@ namespace App\Entity;
 
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
+ * @UniqueEntity(fields={"email"}, message="There is already an account with this email")
  */
-class User implements UserInterface
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups("user:read")
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=180, unique=true)
+     * @Groups("user:read")
      */
     private $email;
 
@@ -31,8 +36,16 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @Groups("user:read")
      */
     private $firstName;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $password;
+
+    private $plainPassword;
 
     public function getId(): ?int
     {
@@ -89,13 +102,11 @@ class User implements UserInterface
     }
 
     /**
-     * This method can be removed in Symfony 6.0 - is not needed for apps that do not check user passwords.
-     *
      * @see PasswordAuthenticatedUserInterface
      */
     public function getPassword(): ?string
     {
-        return null;
+        return $this->password;
     }
 
     /**
@@ -114,7 +125,7 @@ class User implements UserInterface
     public function eraseCredentials()
     {
         // If you store any temporary, sensitive data on the user, clear it here
-        // $this->plainPassword = null;
+        $this->plainPassword = null;
     }
 
     public function getFirstName(): ?string
@@ -127,5 +138,42 @@ class User implements UserInterface
         $this->firstName = $firstName;
 
         return $this;
+    }
+
+    public function setPassword(string $password): self
+    {
+        $this->password = $password;
+
+        return $this;
+    }
+
+    public function getPlainPassword(): ?string
+    {
+        return $this->plainPassword;
+    }
+
+    public function setPlainPassword(string $plainPassword): self
+    {
+        $this->plainPassword = $plainPassword;
+
+        return $this;
+    }
+
+    /**
+     * @Groups("user:read")
+     */
+    public function getAvatarUri(int $size = 32): string
+    {
+        // https://ui-avatars.com/api/?name={{ app.user.firstName|url_encode }}&size=32&background=random
+        return 'https://ui-avatars.com/api/?' . http_build_query([
+            'name' => $this->getDisplayName(),
+            'size' => $size,
+            'background' => 'random',
+        ]);
+    }
+
+    public function getDisplayName(): string
+    {
+        return $this->getFirstName() ?: $this->getEmail();
     }
 }
