@@ -12,7 +12,6 @@ services:
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
         bind:
             bool $isDebug: '%kernel.debug%'
-            $formLoginAuthenticator: '@security.authenticator.form_login.main'
             #Psr\Log\LoggerInterface $mdLogger: '@monolog.logger.markdown' # '@' symbol to define the value as a service
     
     # makes classes in src/ available to be used as services
