@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use Scheb\TwoFactorBundle\Security\TwoFactor\QrCode\QrCodeGenerator;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Doctrine\ORM\EntityManagerInterface;
 use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\Totp\TotpAuthenticatorInterface;
@@ -45,6 +46,19 @@ class SecurityController extends BaseController
             $entityManager->flush();
         }
 
-        dd($user);
+        //dd($totpAuthenticator->getQRContent($user));
+        return $this->render('security/enable2fa.html.twig');
+    }
+
+    /**
+     * @Route("/authentication/2fa/qr-code", name="app_qr_code")
+     * @IsGranted("ROLE_USER")
+     */
+    public function displayGoogleAuthenticatorQrCode(QrCodeGenerator $qrCodeGenerator)
+    {
+        // $qrCode is provided by the endroid/qr-code library. See the docs how to customize the look of the QR code:
+        // https://github.com/endroid/qr-code
+        $qrCode = $qrCodeGenerator->getTotpQrCode($this->getUser());
+        return new Response($qrCode->writeString(), 200, ['Content-Type' => 'image/png']);
     }
 }

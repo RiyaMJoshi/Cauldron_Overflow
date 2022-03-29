@@ -2,6 +2,9 @@
     "babdev/pagerfanta-bundle": {
         "version": "v3.6.1"
     },
+    "bacon/bacon-qr-code": {
+        "version": "2.0.7"
+    },
     "beberlei/assert": {
         "version": "v3.3.2"
     },
@@ -13,6 +16,9 @@
     },
     "composer/package-versions-deprecated": {
         "version": "1.11.99.5"
+    },
+    "dasprid/enum": {
+        "version": "1.0.3"
     },
     "doctrine/annotations": {
         "version": "1.13",
@@ -107,6 +113,9 @@
     "doctrine/sql-formatter": {
         "version": "1.1.2"
     },
+    "endroid/qr-code": {
+        "version": "3.9.7"
+    },
     "fakerphp/faker": {
         "version": "v1.19.0"
     },
@@ -127,6 +136,9 @@
     },
     "jean85/pretty-package-versions": {
         "version": "1.6.0"
+    },
+    "khanamiryan/qrcode-detector-decoder": {
+        "version": "1.0.5.2"
     },
     "knplabs/knp-markdown-bundle": {
         "version": "1.10.0"
@@ -157,6 +169,9 @@
     },
     "monolog/monolog": {
         "version": "2.3.5"
+    },
+    "myclabs/php-enum": {
+        "version": "1.8.3"
     },
     "nikic/php-parser": {
         "version": "v4.13.2"
@@ -239,6 +254,9 @@
             "config/packages/scheb_2fa.yaml",
             "config/routes/scheb_2fa.yaml"
         ]
+    },
+    "scheb/2fa-qr-code": {
+        "version": "v5.13.1"
     },
     "scheb/2fa-totp": {
         "version": "v5.13.1"
