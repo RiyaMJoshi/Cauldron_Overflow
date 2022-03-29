@@ -13,13 +13,14 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 use Symfony\Component\Security\Http\Authenticator\FormLoginAuthenticator;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use SymfonyCasts\Bundle\VerifyEmail\VerifyEmailHelperInterface;
 
 class RegistrationController extends AbstractController
 {
     /**
      * @Route("/register", name="app_register")
      */
-    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager, UserAuthenticatorInterface $userAuthenticator, FormLoginAuthenticator $formLoginAuthenticator): Response
+    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, VerifyEmailHelperInterface $verifyEmailHelper): Response
     {
         $user = new User();
         $form = $this->createForm(RegistrationFormType::class, $user);
@@ -34,20 +35,34 @@ class RegistrationController extends AbstractController
                 )
             );
 
+            $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($user);
             $entityManager->flush();
             
-            return $userAuthenticator->authenticateUser(
-                $user,
-                $formLoginAuthenticator,
-                $request
-            );
 
-           // return $this->redirectToRoute('app_homepage');
+            $signatureComponents = $verifyEmailHelper->generateSignature(
+                'app_verify_email',
+                $user->getId(),
+                $user->getEmail(),
+                ['id' => $user->getId()]
+            );
+            
+            // TODO: in a real app, send this as an email
+            $this->addFlash('success', 'Confirm your email at: '.$signatureComponents->getSignedUrl());
+
+           return $this->redirectToRoute('app_homepage');
         }
 
         return $this->render('registration/register.html.twig', [
             'registrationForm' => $form->createView(),
         ]);
+    }
+
+    /**
+     * @Route("/verify", name="app_verify_email")
+     */
+    public function verifyUserEmail()
+    {
+        # code...
     }
 }
